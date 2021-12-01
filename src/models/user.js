@@ -60,6 +60,32 @@ userSchema.methods.generateAuthToken = async function () {
     return token;
 }
 
+//to display only necessary user detail
+//toJSON makes this work on any router that returns user info
+userSchema.methods.toJSON = function () {
+    const user = this;
+    
+    //to return raw profile data
+    const userObject = user.toObject()
+    
+    delete userObject.password
+    delete userObject.tokens
+    
+    return userObject;
+}
+//to display only necessary user detail
+// userSchema.methods.getPublicProfile = function () {
+//     const user = this;
+
+//     //to return raw profile data
+//     const userObject = user.toObject()
+
+//     delete userObject.password
+//     delete userObject.tokens
+
+//     return userObject;
+// }
+
 //to create new method for login
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({email})
