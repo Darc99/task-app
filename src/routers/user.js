@@ -9,7 +9,7 @@ router.post('/users', async (req,res) => {
 
     try {
         await user.save()
-        const token = await user.generateAuthToken
+        const token = await user.generateAuthToken()
         res.status(201).send({user, token})
     } catch (error) {
         res.status(400).send(error)
@@ -78,8 +78,5 @@ router.delete('/users/me', auth, async (req,res) => {
         res.status(500).send()
     }
 })
-
-
-
 
 module.exports = router
