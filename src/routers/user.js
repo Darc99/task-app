@@ -1,12 +1,14 @@
 const express = require('express');
+const multer = require('multer')
 
 const User = require('../models/user')
 const router = new express.Router();
 const auth = require('../middleware/auth')
 
+
 router.post('/users', async (req,res) => {
     const user = new User(req.body)
-
+    
     try {
         await user.save()
         const token = await user.generateAuthToken()
@@ -29,11 +31,11 @@ router.post('/users/login', async (req,res) => {
 
 router.post('/users/logout', auth, async (req,res) => {
     try {
-       req.user.tokens = req.user.tokens.filter((token) => {
+        req.user.tokens = req.user.tokens.filter((token) => {
             return token.token !== req.token
-       }) 
-       await req.user.save()
-       res.send()
+        }) 
+        await req.user.save()
+        res.send()
     } catch (error) {
         res.status(500).send()
     }
@@ -57,7 +59,7 @@ router.patch('/users/me', auth, async (req,res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
     const isValidOp = updates.every((update) => allowedUpdates.includes(update))
-
+    
     if (!isValidOp) {
         return res.status(400).send({error: 'Invalid updates'})
     }
@@ -77,6 +79,24 @@ router.delete('/users/me', auth, async (req,res) => {
     } catch (error) {
         res.status(500).send()
     }
+})
+
+const upload = multer({
+    dest: 'avatar',
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb) {
+        // if (!file.originalname.endsWith('.pdf'))
+        if (!file.originalname.match(/\.(jpg|png|jpeg)$/)) {
+            return cb(new Error('Please upload a valid file'))
+        }
+        cb(undefined, true)
+    }
+})
+
+router.post('/users/me/avatar', upload.single('avatar'), (req,res) => {
+    res.send()
 })
 
 module.exports = router
